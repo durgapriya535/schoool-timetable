@@ -205,18 +205,12 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
   };
 
   // Helper function to get cell color based on subject
-  const getCellColor = (subject: string | null) => {
+  const getCellColor = (subject: string | null, subjectColor: string | null) => {
     if (!subject) return '#ffffff'; // White for empty cells
+    if (subjectColor) return subjectColor; // Use the color from the database if available
     
-    // Simple hash function to generate consistent colors for subjects
-    let hash = 0;
-    for (let i = 0; i < subject.length; i++) {
-      hash = subject.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    // Generate a light pastel color
-    const h = hash % 360;
-    return `hsl(${h}, 70%, 90%)`;
+    // Fallback to default color if no color is specified
+    return '#3788d8';
   };
 
   return (
@@ -252,7 +246,7 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
                       );
                     }}
                     sx={{ 
-                      backgroundColor: getCellColor(slot.subject),
+                      backgroundColor: getCellColor(slot.subject, slot.subjectColor || null),
                       p: 1,
                       border: '1px solid #e0e0e0',
                       cursor: 'pointer',

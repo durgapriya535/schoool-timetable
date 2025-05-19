@@ -60,9 +60,12 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ schedule, type }) => {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                           <Chip 
                             label={type === 'class' ? slot.subject : slot.class} 
-                            color="primary" 
                             size="small"
-                            sx={{ fontWeight: 'bold' }}
+                            sx={{ 
+                              fontWeight: 'bold',
+                              backgroundColor: type === 'class' && slot.subjectColor ? slot.subjectColor : '#3788d8',
+                              color: '#fff'
+                            }}
                           />
                           <Typography variant="caption" display="block">
                             {type === 'class' ? slot.teacher : slot.subject}

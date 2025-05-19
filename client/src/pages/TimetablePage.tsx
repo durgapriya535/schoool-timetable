@@ -488,7 +488,7 @@ const TimetablePage: React.FC = () => {
                         <TableCell 
                           key={index}
                           sx={{ 
-                            backgroundColor: slot.subject ? '#e3f2fd' : '#ffffff',
+                            backgroundColor: slot.subject ? (slot.subjectColor || '#3788d8') : '#ffffff',
                             p: 1,
                             border: '1px solid #e0e0e0'
                           }}

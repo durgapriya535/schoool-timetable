@@ -57,6 +57,7 @@ export interface ScheduleSlot {
   subject: string | null;
   teacher: string | null;
   class?: string | null;
+  subjectColor?: string | null;
 }
 
 // Day schedule type
@@ -89,6 +90,7 @@ export interface WeekdayScheduleSlot {
   classId: number | null; // Added classId field
   subject: string | null;
   teacher: string | null;
+  subjectColor?: string | null;
 }
 
 // Weekday schedule type

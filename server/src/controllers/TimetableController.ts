@@ -20,6 +20,7 @@ interface ClassScheduleSlot {
   periodName: string;
   subject: string | null;
   teacher: string | null;
+  subjectColor: string | null;
 }
 
 interface ClassDaySchedule {
@@ -39,6 +40,7 @@ interface TeacherScheduleSlot {
   periodName: string;
   class: string | null;
   subject: string | null;
+  subjectColor: string | null;
 }
 
 interface TeacherDaySchedule {
@@ -60,6 +62,7 @@ interface WeekdayScheduleSlot {
   classId: number;
   subject: string | null;
   teacher: string | null;
+  subjectColor: string | null;
 }
 
 interface WeekdaySchedule {
@@ -413,14 +416,16 @@ export class TimetableController {
               periodId: period.id,
               periodName: period.name,
               subject: entry.subject.name,
-              teacher: entry.teacher.name
+              teacher: entry.teacher.name,
+              subjectColor: entry.subject.color || '#3788d8'
             });
           } else {
             daySchedule.slots.push({
               periodId: period.id,
               periodName: period.name,
               subject: null,
-              teacher: null
+              teacher: null,
+              subjectColor: null
             });
           }
         }
@@ -477,14 +482,16 @@ export class TimetableController {
               periodId: period.id,
               periodName: period.name,
               class: entry.class.name,
-              subject: entry.subject.name
+              subject: entry.subject.name,
+              subjectColor: entry.subject.color || '#3788d8'
             });
           } else {
             daySchedule.slots.push({
               periodId: period.id,
               periodName: period.name,
               class: null,
-              subject: null
+              subject: null,
+              subjectColor: null
             });
           }
         }
@@ -544,7 +551,8 @@ export class TimetableController {
               class: classItem.name,
               classId: classItem.id,
               subject: entry.subject.name,
-              teacher: entry.teacher.name
+              teacher: entry.teacher.name,
+              subjectColor: entry.subject.color || '#3788d8'
             });
           } else {
             schedule.slots[classItem.name].push({
@@ -553,7 +561,8 @@ export class TimetableController {
               class: classItem.name,
               classId: classItem.id,
               subject: null,
-              teacher: null
+              teacher: null,
+              subjectColor: null
             });
           }
         }
