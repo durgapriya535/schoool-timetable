@@ -23,8 +23,8 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ schedule, type }) => {
     ? `Class Schedule: ${(schedule as ClassSchedule).className}` 
     : `Teacher Schedule: ${(schedule as TeacherSchedule).teacherName}`;
 
-  // Get only weekdays (Monday to Friday)
-  const weekdays = schedule.days.slice(0, 5);
+  // Get weekdays including Saturday (Monday to Saturday)
+  const weekdays = schedule.days.slice(0, 6);
   
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 4 }}>

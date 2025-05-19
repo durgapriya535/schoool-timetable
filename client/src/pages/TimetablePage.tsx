@@ -335,7 +335,6 @@ const TimetablePage: React.FC = () => {
           <Tab label="Class Timetable" />
           <Tab label="Teacher Timetable" />
           <Tab label="Weekday View" />
-          <Tab label="Analytics" />
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -371,7 +370,7 @@ const TimetablePage: React.FC = () => {
                     <TimetableGrid schedule={classSchedule} type="class" />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <SubjectDistributionChart schedule={classSchedule} />
+                    <SubjectDistributionChart schedule={classSchedule} subjects={subjects} />
                   </Grid>
                 </Grid>
               ) : (
@@ -520,25 +519,9 @@ const TimetablePage: React.FC = () => {
             </Alert>
           )}
         </TabPanel>
-        
-        <TabPanel value={tabValue} index={3}>
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Subject Distribution
-            </Typography>
-            {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : subjects.length > 0 ? (
-              <SubjectDistributionChart subjects={subjects} />
-            ) : (
-              <Alert severity="info">No subject data available.</Alert>
-            )}
-          </Box>
-        </TabPanel>
       </Paper>
 
+      {/* Dialog for adding timetable entries */}
       <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <DialogTitle>Add Timetable Entry</DialogTitle>
         <DialogContent>
