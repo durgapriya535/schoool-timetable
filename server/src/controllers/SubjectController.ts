@@ -33,7 +33,7 @@ export class SubjectController {
 
   async create(req: Request, res: Response) {
     try {
-      const { name, code, description, weeklyHours } = req.body;
+      const { name, code, description, weeklyHours, color } = req.body;
       
       if (!name) {
         return res.status(400).json({ message: "Subject name is required" });
@@ -43,7 +43,8 @@ export class SubjectController {
         name,
         code,
         description,
-        weeklyHours: weeklyHours || 0
+        weeklyHours: weeklyHours || 0,
+        color
       });
       
       await this.subjectRepository.save(newSubject);
@@ -57,7 +58,7 @@ export class SubjectController {
   async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const { name, code, description, weeklyHours } = req.body;
+      const { name, code, description, weeklyHours, color } = req.body;
       
       const subject = await this.subjectRepository.findOne({ where: { id } });
       
@@ -69,6 +70,7 @@ export class SubjectController {
       subject.code = code !== undefined ? code : subject.code;
       subject.description = description !== undefined ? description : subject.description;
       subject.weeklyHours = weeklyHours !== undefined ? weeklyHours : subject.weeklyHours;
+      subject.color = color !== undefined ? color : subject.color;
       
       await this.subjectRepository.save(subject);
       return res.json(subject);

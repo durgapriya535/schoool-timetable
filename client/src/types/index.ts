@@ -14,6 +14,7 @@ export interface Subject {
   code?: string;
   description?: string;
   weeklyHours: number;
+  color?: string;
 }
 
 // Teacher type definition

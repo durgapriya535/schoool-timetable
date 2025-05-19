@@ -20,7 +20,9 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip
+  Tooltip,
+  InputLabel,
+  FormControl
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,7 +41,8 @@ const SubjectsPage: React.FC = () => {
     name: '',
     code: '',
     description: '',
-    weeklyHours: 0
+    weeklyHours: 0,
+    color: '#3788d8'
   });
 
   const fetchSubjects = async () => {
@@ -66,7 +69,8 @@ const SubjectsPage: React.FC = () => {
       name: '',
       code: '',
       description: '',
-      weeklyHours: 0
+      weeklyHours: 0,
+      color: '#3788d8'
     });
     setFormOpen(true);
   };
@@ -77,7 +81,8 @@ const SubjectsPage: React.FC = () => {
       name: subject.name,
       code: subject.code || '',
       description: subject.description || '',
-      weeklyHours: subject.weeklyHours
+      weeklyHours: subject.weeklyHours,
+      color: subject.color || '#3788d8'
     });
     setFormOpen(true);
   };
@@ -92,6 +97,13 @@ const SubjectsPage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       [name]: name === 'weeklyHours' ? parseInt(value) || 0 : value
+    }));
+  };
+
+  const handleColorChange = (color: string) => {
+    setFormData(prev => ({
+      ...prev,
+      color
     }));
   };
 
@@ -161,6 +173,7 @@ const SubjectsPage: React.FC = () => {
                 <TableCell>Code</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Weekly Hours</TableCell>
+                <TableCell>Color</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -178,6 +191,16 @@ const SubjectsPage: React.FC = () => {
                     <TableCell>{subject.code || '-'}</TableCell>
                     <TableCell>{subject.description || '-'}</TableCell>
                     <TableCell>{subject.weeklyHours}</TableCell>
+                    <TableCell>
+                      <Box 
+                        sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          backgroundColor: subject.color || '#3788d8',
+                          borderRadius: '4px'
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Tooltip title="Edit">
@@ -242,6 +265,20 @@ const SubjectsPage: React.FC = () => {
                 fullWidth
                 inputProps={{ min: 0 }}
               />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="subject-color">Color</InputLabel>
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                  <input
+                    id="subject-color"
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) => handleColorChange(e.target.value)}
+                    style={{ width: '100%', height: '38px' }}
+                  />
+                </Box>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField
