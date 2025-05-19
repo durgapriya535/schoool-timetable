@@ -19,7 +19,8 @@ import {
   Select,
   MenuItem,
   FormHelperText,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Alert
 } from '@mui/material';
 
 import { WeekdaySchedule, Teacher, Subject } from '../../types';
@@ -41,6 +42,7 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [selectedCell, setSelectedCell] = useState<{
     className: string;
+    classId: number;
     periodId: number;
     periodName: string;
     currentTeacher: string | null;
@@ -56,6 +58,9 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
     teacherId: false,
     subjectId: false
   });
+  
+  // State for error message to display in the dialog
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Reset form when dialog opens with a new cell
   useEffect(() => {
@@ -82,9 +87,10 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
     }
   }, [selectedCell, teachers, subjects]);
 
-  const handleCellClick = (className: string, periodId: number, periodName: string, teacher: string | null, subject: string | null) => {
+  const handleCellClick = (className: string, classId: number, periodId: number, periodName: string, teacher: string | null, subject: string | null) => {
     setSelectedCell({
       className,
+      classId,
       periodId,
       periodName,
       currentTeacher: teacher,
@@ -96,6 +102,8 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedCell(null);
+    // Clear any error messages when closing the dialog
+    setErrorMessage(null);
   };
 
   const handleFormChange = (event: SelectChangeEvent<string>) => {
@@ -128,23 +136,71 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
     if (!validateForm() || !selectedCell) return;
     
     try {
-      // Find the class ID based on the name
-      const classId = parseInt(selectedCell.className.split(' ')[1]); // Assuming format "Class X" where X is the ID
+      // Get all required data from state
+      const classId = selectedCell.classId;
+      const periodId = selectedCell.periodId;
+      const dayOfWeek = schedule.dayNumber;
       
-      await timetableService.create({
+      // Convert string IDs to integers
+      const teacherId = parseInt(formData.teacherId);
+      const subjectId = parseInt(formData.subjectId);
+      
+      // Ensure all required fields are provided
+      if (!classId || !teacherId || !subjectId || !periodId || !dayOfWeek) {
+        setErrorMessage('All fields are required');
+        return;
+      }
+      
+      // Prepare data for API call
+      const timetableData = {
         classId,
-        teacherId: parseInt(formData.teacherId),
-        subjectId: parseInt(formData.subjectId),
-        periodId: selectedCell.periodId,
-        dayOfWeek: schedule.dayNumber
-      });
+        teacherId,
+        subjectId,
+        periodId,
+        dayOfWeek
+      };
+      // Check if the cell already has a teacher or subject assigned
+      if (selectedCell.currentTeacher || selectedCell.currentSubject) {
+        // Update existing entry
+        const entries = await timetableService.getByClass(timetableData.classId);
+        const existingEntry = entries.find(entry => 
+          entry.dayOfWeek === timetableData.dayOfWeek && 
+          entry.period && entry.period.id === timetableData.periodId
+        );
+        
+        if (existingEntry) {
+          // Update the existing entry
+          await timetableService.update(existingEntry.id, {
+            teacherId: timetableData.teacherId,
+            subjectId: timetableData.subjectId,
+            dayOfWeek: timetableData.dayOfWeek
+          });
+        } else {
+          // Fallback to create if entry not found
+          await timetableService.create(timetableData);
+        }
+      } else {
+        // No existing entry, create a new one
+        await timetableService.create(timetableData);
+      }
       
       // Notify parent component to refresh the data
       onCellUpdate();
       handleDialogClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating timetable:', error);
-      // Could add error handling here
+      
+      // Check if it's a 409 conflict error
+      if (error.response && error.response.status === 409) {
+        // Extract and display the specific error message from the server
+        const serverMessage = error.response.data?.message || 'Scheduling conflict detected';
+        setErrorMessage(serverMessage);
+        // Don't close the dialog so the user can correct the issue
+      } else {
+        // For other errors, show an alert and close the dialog
+        alert(`Failed to save timetable entry: ${error.message || 'Unknown error'}. Please check the console for details.`);
+        handleDialogClose();
+      }
     }
   };
 
@@ -184,13 +240,17 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
                 {schedule.slots[className].map((slot, index) => (
                   <TableCell 
                     key={index}
-                    onClick={() => handleCellClick(
-                      className, 
-                      slot.periodId, 
-                      slot.periodName, 
-                      slot.teacher, 
-                      slot.subject
-                    )}
+                    onClick={() => {
+                      // Use className from the outer loop and class property from the slot
+                      handleCellClick(
+                        slot.class!, // Use className from the outer loop instead of slot.className
+                        slot.classId!, // Use non-null assertion since we know it's not null
+                        slot.periodId, 
+                        slot.periodName, 
+                        slot.teacher, 
+                        slot.subject
+                      );
+                    }}
                     sx={{ 
                       backgroundColor: getCellColor(slot.subject),
                       p: 1,
@@ -235,6 +295,12 @@ const EditableWeekdayView: React.FC<EditableWeekdayViewProps> = ({
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
+            {/* Display error message if present */}
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
             <FormControl fullWidth margin="normal" error={formErrors.subjectId}>
               <InputLabel id="edit-subject-label">Subject</InputLabel>
               <Select

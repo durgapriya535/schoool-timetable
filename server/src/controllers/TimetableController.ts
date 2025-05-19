@@ -57,6 +57,7 @@ interface WeekdayScheduleSlot {
   periodId: number;
   periodName: string;
   class: string | null;
+  classId: number;
   subject: string | null;
   teacher: string | null;
 }
@@ -541,6 +542,7 @@ export class TimetableController {
               periodId: period.id,
               periodName: period.name,
               class: classItem.name,
+              classId: classItem.id,
               subject: entry.subject.name,
               teacher: entry.teacher.name
             });
@@ -549,6 +551,7 @@ export class TimetableController {
               periodId: period.id,
               periodName: period.name,
               class: classItem.name,
+              classId: classItem.id,
               subject: null,
               teacher: null
             });

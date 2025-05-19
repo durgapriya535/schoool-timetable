@@ -85,6 +85,7 @@ export interface WeekdayScheduleSlot {
   periodId: number;
   periodName: string;
   class: string | null;
+  classId: number | null; // Added classId field
   subject: string | null;
   teacher: string | null;
 }

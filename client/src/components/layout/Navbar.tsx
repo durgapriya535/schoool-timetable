@@ -30,6 +30,9 @@ const Navbar: React.FC = () => {
           <Button color="inherit" component={RouterLink} to="/timetable">
             Timetable
           </Button>
+          <Button color="inherit" component={RouterLink} to="/weekday-schedule">
+            Weekday Schedule
+          </Button>
         </Box>
       </Toolbar>
     </AppBar>
