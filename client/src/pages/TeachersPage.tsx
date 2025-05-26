@@ -19,13 +19,20 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip
+  Tooltip,
+  TableSortLabel
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { teacherService } from '../services/teacherService';
 import { Teacher } from '../types';
+
+// Type for sort order
+type Order = 'asc' | 'desc';
+
+// Type for sort field
+type SortField = 'name' | 'specialization' | 'maxWeeklyHours';
 
 const TeachersPage: React.FC = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -40,6 +47,10 @@ const TeachersPage: React.FC = () => {
     specialization: '',
     maxWeeklyHours: 0
   });
+  
+  // Sorting states
+  const [orderBy, setOrderBy] = useState<SortField>('name');
+  const [order, setOrder] = useState<Order>('asc');
 
   const fetchTeachers = async () => {
     try {
@@ -54,6 +65,37 @@ const TeachersPage: React.FC = () => {
       setLoading(false);
     }
   };
+  
+  // Function to handle sorting
+  const handleRequestSort = (property: SortField) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+  
+  // Function to sort teachers based on current sort settings
+  const sortedTeachers = React.useMemo(() => {
+    const comparator = (a: Teacher, b: Teacher) => {
+      let aValue: any = a[orderBy];
+      let bValue: any = b[orderBy];
+      
+      // Handle null or undefined values
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+      
+      // For string comparison
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return order === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      }
+      
+      // For number comparison
+      return order === 'asc' ? aValue - bValue : bValue - aValue;
+    };
+    
+    return [...teachers].sort(comparator);
+  }, [teachers, order, orderBy]);
 
   useEffect(() => {
     fetchTeachers();
@@ -156,22 +198,46 @@ const TeachersPage: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={orderBy === 'name'}
+                    direction={orderBy === 'name' ? order : 'asc'}
+                    onClick={() => handleRequestSort('name')}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>Phone</TableCell>
-                <TableCell>Specialization</TableCell>
-                <TableCell>Max Weekly Hours</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={orderBy === 'specialization'}
+                    direction={orderBy === 'specialization' ? order : 'asc'}
+                    onClick={() => handleRequestSort('specialization')}
+                  >
+                    Specialization
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={orderBy === 'maxWeeklyHours'}
+                    direction={orderBy === 'maxWeeklyHours' ? order : 'asc'}
+                    onClick={() => handleRequestSort('maxWeeklyHours')}
+                  >
+                    Max Weekly Hours
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {teachers.length === 0 ? (
+              {sortedTeachers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No teachers found. Add a new teacher to get started.
+                  <TableCell colSpan={5} align="center">
+                    No teachers found
                   </TableCell>
                 </TableRow>
               ) : (
-                teachers.map((teacher) => (
+                sortedTeachers.map((teacher) => (
                   <TableRow key={teacher.id}>
                     <TableCell>{teacher.name}</TableCell>
                     <TableCell>{teacher.phone || '-'}</TableCell>
